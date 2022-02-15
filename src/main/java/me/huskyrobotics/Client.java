@@ -2,8 +2,11 @@ package me.huskyrobotics;
 
 import org.java_websocket.client.WebSocketClient;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) throws URISyntaxException, InterruptedException {
