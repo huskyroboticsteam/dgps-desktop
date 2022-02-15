@@ -1,4 +1,5 @@
 package me.huskyrobotics;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
@@ -26,7 +27,9 @@ public class TestServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("received message from "	+ conn.getRemoteSocketAddress() + ": " + message);
+        // converts any data into text data
+        PrintWriter out = new PrintWriter(System.out, true);
+        out.println("received message from "	+ conn.getRemoteSocketAddress() + ": " + message);
     }
 
     @Override
