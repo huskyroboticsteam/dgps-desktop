@@ -7,13 +7,13 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
 
-public class ExampleClient extends WebSocketClient {
+public class WSClient extends WebSocketClient {
 
-    public ExampleClient(URI serverUri, Draft draft) {
+    public WSClient(URI serverUri, Draft draft) {
         super(serverUri, draft);
     }
 
-    public ExampleClient(URI serverURI) {
+    public WSClient(URI serverURI) {
         super(serverURI);
     }
 
@@ -43,8 +43,4 @@ public class ExampleClient extends WebSocketClient {
         System.err.println("an error occurred:" + ex);
     }
 
-    public static void main(String[] args) throws URISyntaxException {
-        WebSocketClient client = new ExampleClient(new URI("ws://localhost:3001"));
-        client.connect();
-    }
 }
