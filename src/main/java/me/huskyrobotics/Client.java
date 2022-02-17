@@ -1,5 +1,7 @@
 package me.huskyrobotics;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.java_websocket.client.WebSocketClient;
 
 import java.io.BufferedReader;
@@ -10,14 +12,17 @@ import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) throws URISyntaxException, InterruptedException {
-        WWebSocketClient client = new WSClient(new URI("ws://" + getHost() + ":" + getPort()));
+        WebSocketClient client = new WSClient(new URI("ws://" + getHost() + ":" + getPort()));
         client.connectBlocking();
+
         try {
             // takes input from System.in and echoes message in server
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
             String userInput;
             while (!(userInput = stdIn.readLine()).equals("STOP")) {
-                client.send(userInput);
+                // converts correction data into json object and sends it to WS server
+                CorrectionData data = new CorrectionData(userInput);
+                client.send(convertDataToJson(data));
             }
             client.close();
         } catch (Exception ex) {
@@ -43,5 +48,32 @@ public class Client {
         System.out.print("Port Number: ");
         Scanner in = new Scanner(System.in);
         return Integer.parseInt(in.nextLine());
+    }
+
+    /**
+     * Converts correction data into JSON object.
+     * @param data correction data/
+     * @return data as a JSON object.
+     */
+    private static String convertDataToJson(CorrectionData data) {
+        GsonBuilder builder = new GsonBuilder();
+
+        Gson gson = builder.create();
+        return gson.toJson(data);
+    }
+
+    /**
+     * Correction Data object from the DGPS reference station.
+     */
+    private static class CorrectionData {
+        String payload;
+
+        public CorrectionData() {
+            this.payload = "";
+        }
+
+        public CorrectionData(String payload) {
+            this.payload = payload;
+        }
     }
 }
