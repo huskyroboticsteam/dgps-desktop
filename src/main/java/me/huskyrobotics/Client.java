@@ -3,28 +3,41 @@ package me.huskyrobotics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.enums.ReadyState;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Scanner;
 
 public class Client {
-    public static void main(String[] args) throws URISyntaxException, InterruptedException {
-        WebSocketClient client = new WSClient(new URI("ws://" + getHost() + ":" + getPort()));
+    public static void main(String[] args) throws URISyntaxException, InterruptedException, IOException {
+        URI wsURI = new URI("ws://" + getHost() + ":" + getPort());
+        WebSocketClient client = new WSClient(wsURI);
         client.connectBlocking();
+        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 
         try {
             // takes input from System.in and echoes message in server
-            BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
             String userInput;
-            while (!(userInput = stdIn.readLine()).equals("STOP")) {
+            while (client.isOpen()) {
                 // converts correction data into json object and sends it to WS server
-                CorrectionData data = new CorrectionData(userInput);
-                client.send(convertDataToJson(data));
+                userInput = stdIn.readLine();
+                if (userInput.equalsIgnoreCase("reconnect")) {
+                    client.closeBlocking();
+                    wsURI.resolve("ws://" + getHost() + ":" + getPort());
+                    client = new WSClient(wsURI);
+                    client.connectBlocking();
+                } else if (userInput.equalsIgnoreCase("close")) {
+                    break;
+                } else {
+                    CorrectionData data = new CorrectionData(userInput);
+                    client.send(convertDataToJson(data));
+                }
             }
-            client.close();
+            client.closeBlocking();
         } catch (Exception ex) {
             System.out.println("Client Failed to send message: " + ex.toString());
         }
@@ -52,7 +65,7 @@ public class Client {
 
     /**
      * Converts correction data into JSON object.
-     * @param data correction data/
+     * @param data correction data.
      * @return data as a JSON object.
      */
     private static String convertDataToJson(CorrectionData data) {
